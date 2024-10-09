@@ -1,0 +1,12 @@
+{
+    "task": {
+        "task_class": "GridworldTask"
+    },
+    "env_config": {
+        "env_class": "GridworldEnv",
+        "instruction_path": "eval_agent/prompt/instructions/gridworld_inst.txt",
+        "icl_path": "eval_agent/prompt/icl_examples/gridworld_icl_8_first-step-reversed_none.json",
+        "icl_format": "conversation",
+        "max_steps": 200
+    }
+}
