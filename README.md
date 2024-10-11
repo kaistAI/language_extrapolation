@@ -173,3 +173,38 @@ done
 ```
 python -m eval_agent.visualize_success --exp_config gridworld --split test_3000 --model_path ${save_dir}${cur_model_name} --output_dir ${test_output_dir} --xsize 10 --ysize 10 --test_ysize 20
 ```
+
+## Appendix. Few-shot experiment
+### Appendix A. LLaMA-3 8B
+```bash
+IFS=',' read -ra gpus <<< "0,1,2,3"
+node_num=${#gpus[@]}
+num_workers=${#gpus[@]}
+worker_idx=0
+for ((j=0;j<${num_workers};j=j+1)); do
+    echo "Launch the model on gpu ${j}"
+    CUDA_VISIBLE_DEVICES=${gpus[$((${worker_idx} % ${node_num}))]} python -m eval_agent.main_inference_vllm_single --agent_config fastchat --exp_config gridworld --split test_3000 --model_path meta-llama/Meta-Llama-3-8B --basic_mode 5 --part_num ${num_workers} --part_idx ${j} --output_dir ${test_output_dir} --n_icl ${n_shot}&
+    worker_idx=$(($worker_idx+1))
+done
+```
+### Appendix B. LLaMA-3 70B
+```bash
+IFS=',' read -ra gpus <<< "0,1,2,3"
+node_num=${#gpus[@]}
+num_workers=1
+node_per_worker=$((${node_num} / ${num_workers}))
+
+worker_idx=0
+for ((j=0;j<${num_workers};j=j+1)); do
+    echo "gpu : ${gpus[@]:$((${node_per_worker} * j)):${node_per_worker}}"
+    gpu_idx=(${gpus[@]:$((${node_per_worker} * j)):${node_per_worker}})
+    CUDA_VISIBLE_DEVICES=$(IFS=,; echo "${gpu_idx[*]}") python -m eval_agent.main_inference_vllm_single --agent_config fastchat --exp_config gridworld --split test_3000 --model_path meta-llama/Meta-Llama-3-70B --basic_mode 5 --part_num ${num_workers} --part_idx ${j} --output_dir ${test_output_dir} --n_icl ${n_shot} --num_gpus ${node_per_worker}&
+done
+```
+### Appendix C. OpenAI API (GPT-4o, GPT-o1)
+```bash
+num_workers=
+for ((j=0;j<${num_workers};j=j+1)); do
+    python -m eval_agent.main_inference_gpt_single --agent_config fastchat --exp_config gridworld --split test_3000 --model_path ${model_name} --basic_mode 5 --part_num ${num_workers} --part_idx ${j} --output_dir ${test_output_dir} --n_icl ${n_shot}&
+done
+```
