@@ -1,5 +1,5 @@
 # language_extrapolation
-This is an official repository for the paper, [How language models extrapolate outside the training data: A case study in Textualized Gridworld](https://arxiv.org/abs/2406.15275)[Neurips 2024 Compositional learning Workshop].
+This is an official repository for the paper, [How language models extrapolate outside the training data: A case study in Textualized Gridworld](https://arxiv.org/abs/2406.15275).
 ## 1. Env. Setup
 ```
 conda create -n [your virtual env. name] python=3.9
