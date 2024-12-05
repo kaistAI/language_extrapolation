@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="description" content="How language models extrapolate outside the training data: A case study in Textualized Gridworld">
+  <meta name="keywords" content="Cognitive map, Neurips, ICLR, NeuroAI, language model, language agent, planning">
+  <script async="true" src="https://cdn.jsdelivr.net/npm/mathjax@2/MathJax.js?config=AM_CHTML"> </script>
+  <title>How language models extrapolate outside the training data: A case study in Textualized Gridworld</title>
+
+  <link href="https://fonts.googleapis.com/css?family=Google+Sans|Noto+Sans|Castoro" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.3/css/bulma.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+  
+  <style>
+    .hero-image {
+      width: 100%;
+      max-width: 800px;
+      margin: 2rem auto;
+    }
+    .blog-content {
+      font-size: 1.1rem;
+      line-height: 1.8;
+    }
+    .blog-content img {
+      margin: 2rem 0;
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    .caption {
+      font-size: 0.9rem;
+      color: #666;
+      text-align: center;
+      margin-top: -1.5rem;
+      margin-bottom: 2rem;
+    }
+    .author-info {
+      margin: 2rem 0;
+      padding: 1.5rem;
+      background: #f8f9fa;
+      border-radius: 8px;
+    }
+    .key-insight {
+      background: #f8f9fa;
+      padding: 1.5rem;
+      border-radius: 8px;
+      margin: 2rem 0;
+    }
+    .code-block {
+      background: #f8f9fa;
+      padding: 1.5rem;
+      border-radius: 8px;
+      font-family: monospace;
+      margin: 1.5rem 0;
+    }
+    .links {
+      margin-top: 1rem;
+    }
+    .links a {
+      margin-right: 1rem;
+    }
+    .citation-box {
+      background: #f8f9fa;
+      padding: 1.5rem;
+      border-radius: 8px;
+      margin-top: 2rem;
+      font-family: monospace;
+      white-space: pre-wrap;
+    }
+    .reference {
+      font-size: 0.9rem;
+      color: #666;
+      padding-left: 2rem;
+      text-indent: -2rem;
+      margin-bottom: 1rem;
+    }
+  </style>
+</head>
+
+<body>
+<section class="hero is-light is-medium">
+  <div class="hero-body">
+    <div class="container is-max-desktop">
+      <div class="columns is-centered">
+        <div class="column has-text-centered">
+          <h1 class="title is-2">How language models extrapolate outside the training data: A case study in Textualized Gridworld</h1>
+          <p class="subtitle is-4">Exploring how language models can learn to solve complex problems outside the training boundary with simple CoT variant</p>
+          
+          <div class="author-info">
+            <div class="authors">
+              <span class="author-name">Doyoung Kim</span><sup>1</sup>,
+              <span class="author-name">Jongwon Lee</span><sup>2</sup>,
+              <span class="author-name">Jinho Park</span><sup>1</sup>,
+              <span class="author-name">Minjoon Seo</span><sup>1</sup>
+            </div>
+            <div class="affiliations">
+              <p><sup>1</sup>KAIST AI, <sup>2</sup>Samsung Research</p>
+            </div>
+            <div class="date">
+              <p>December 2024</p>
+            </div>
+            <div class="links">
+              <a href="https://arxiv.org/abs/2406.15275" class="button is-small is-link">
+                <span class="icon"><i class="fas fa-file-alt"></i></span>
+                <span>Paper</span>
+              </a>
+              <a href="https://github.com/kaistAI/language_extrapolation" class="button is-small is-dark">
+                <span class="icon"><i class="fab fa-github"></i></span>
+                <span>Code</span>
+              </a>
+            </div>
+          </div>
+          <div class="columns is-centered">
+            <div class="column is-8">
+              <div class="box">
+                <div class="content">
+                  <p class="is-size-5">
+                    Imagine teaching someone to navigate through a small maze. They quickly learn basic rules: avoid walls, find shortest paths, reach goals. But what happens when you present them with a much larger, more complex maze? Humans handle this leap with remarkable ease. For language models, however, this kind of extrapolation has been a significant challenge.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+  
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container is-max-desktop">
+    <div class="content blog-content">
+      <p class="is-size-5">
+        Recent advances in language models have shown remarkable capabilities in various domains, from natural language understanding to complex reasoning tasks. However, their ability to extrapolate beyond training data remains a significant challenge, particularly in structured problem-solving scenarios like path planning and navigation, even after fine-tuning<sup>[1]</sup>.
+      </p>
+      <div class="mt-4">
+        <img src="materials/human_vs_lm.png" alt="Comparison of human and AI planning" class="hero-image">
+      </div>
+
+      <h2 class="title is-3 mt-6">The Human Edge in Problem-Solving</h2>
+      <p>
+        Humans demonstrate remarkable abilities in generalizing problem-solving strategies across different scales and complexities. This capability stems from our cognitive architecture, which cognitive scientists have long studied and categorized into two primary systems <sup>[2]</sup>:
+      </p>
+      <ul>
+        <li><strong>System 1:</strong> Quick, instinctive responses based on familiar patterns, operating automatically and with little effort</li>
+        <li><strong>System 2:</strong> Careful, methodical thinking that creates mental maps of problems, engaging in conscious reasoning and strategic planning</li>
+      </ul>
+
+      <p>
+        This dual-process theory has profound implications for AI development, particularly in how we approach the challenge of making language models truly cognitive.
+      </p>
+      <p>
+        Recent approaches, such as Chain of Thought (CoT) reasoning<sup>[3]</sup>, show promise for mimicking System 2 reasoning via in-context learning. Theoretical findings
+        suggest that complex problems outside the <span> `TC^0 `</span> (polynomial-sized constant-depth circuits) complexity class can be solved with an ample amount of CoT tokens<sup>[4]</sup>. However, the precise form of CoT required remains unclear. <b>Our research is to configure the CoT variant that can show emergent cognitive map-like behavior in language models.</b>
+      </p>
+      <h2 class="title is-3 mt-6">Extrapolation in Gridworld as a Probe of Cognitive Map</h2>
+      <p>
+        How do we know if the language model exhibits cognitive map-like behavior? We investigate this through extrapolation, a key characteristic of System 2 reasoning. By training a language model with simple demonstrations and testing its extrapolation capabilities in complex environments, we can determine if it possesses cognitive maps. Specifically, we utilize a Gridworld environment for several compelling reasons:
+      </p>
+      <div class="box">
+        <ol>
+          <li><strong>Cognitive science foundations:</strong> Probing
+            mental representations through spatial tasks is foundational in cognitive science<sup>[5]</sup></li>
+          <li><strong>Minimal knowledge requirements:</strong> Gridworld provides an ideal environment to probe the
+            extrapolability of language models while minimizing the influence of world knowledge</li>
+          <li><strong>Scalability:</strong> Gridworld allows us to systematically increase
+            the problem space by expanding the grid dimensions</li>
+          <li><strong>Complexity class and computational limitations:</strong> Gridworld has a complexity class outside <span> `TC^0`</span>, so a fixed-precision transformer can't solve it<sup>[6]</sup></li>
+        </ol>
+      </div>
+
+      <div class="columns">
+        <div class="column">
+          <img src="materials/optimal_reachable_analysis.png" alt="Planning Scenarios">
+          <p class="caption">
+            <b>Two planning scenarios:</b> The difference between optimal planning (single-turn) and reachable planning (multi-turn) approaches in solving navigation tasks.
+          </p>
+        </div>
+      </div>
+      <p>
+        We see two types of planning scenarios in Gridworld: optimal planning and reachable planning. Optimal planning involves finding the shortest path to the goal, while reachable planning allows for multiple steps to reach the goal. The key difference lies in the complexity of the planning task and the need for offline planning before actual interaction.
+      </p>
+
+      <h2 class="title is-3">Cognitive Maps: A Bridge to Better Extrapolation</h2>
+      <p>
+        Our research introduces a novel approach to enhance language models' extrapolation capabilities through cognitive maps. This approach is inspired by neuroscientific research on how humans represent and navigate spatial environments <sup>[4]</sup>. The cognitive map framework consists of three key components:
+      </p>
+      
+      <div class="columns">
+        <div class="column is-half">
+          <img src="materials/cognitive_map.png" alt="Cognitive Map Structure" width="100%">
+          <p class="caption">The three-step process of cognitive map formation and utilization in path planning</p>
+        </div>
+        <div class="column is-half">
+          <div class="box">
+            <h4 class="title is-5">Key Components:</h4>
+            <ol>
+              <li><strong>Sampling:</strong> Systematic exploration of the state space to identify potential paths and obstacles</li>
+              <li><strong>Propagation:</strong> Building a comprehensive mental model of the environment through information sharing between states</li>
+              <li><strong>Backtracking:</strong> Efficient path planning by working backwards from the goal state</li>
+            </ol>
+          </div>
+        </div>
+      </div>
+
+
+
+      <div class="column is-full">
+        <div style="text-align: center;">
+          <img src="materials/data_generation.png" alt="Data Generation Example" width="50%">
+        <p class="caption">An example data instance for optimal planning, consists of input specification of the environment and the output consisting of CoT and optimal plan.</p>
+      </div>
+
+      <h2 class="title is-3">Experimental Results</h2>
+      <p>
+        We compared the performance of language models equipped with cognitive maps against baseline models with implicit (directly predicting the next action) and explicit (predicting the next action via conventional CoT) planning capabilities. Here are some key findings:
+      </p>
+      <div class="columns">
+        <div class="column">
+          <img src="materials/compartion_cogmap.png" alt="Comparison of Models">
+          <p class="caption">Performance comparison showing significant improvements in extrapolation capabilities with cognitive maps</p>
+        </div>
+      </div>
+
+      <p>
+        Our experiments demonstrate that models equipped with cognitive maps only shows significant improvements in extrapolation capabilities, achieving higher success rates in unseen environments and more optimal paths in reachable planning scenarios.
+      </p>
+
+      <div class="columns">
+        <div class="column">
+          <img src="materials/input_comp_comparison.png" alt="Input and Complexity comparison">
+          <p class="caption">Performance comparison of cognitive maps against baseline methods across different
+            dimensions of extrapolation</p>
+        </div>
+      </div>
+
+      <p>
+        We further support our analysis by examining model performance across problem complexity and
+input length. While baseline methods fail sharply beyond training boundaries, cognitive
+maps maintain significant performance at twice the training thresholds.
+      </p>
+
+    </div>
+  </div>
+</section>
+
+
+<section class="section">
+  <div class="container is-max-desktop">
+    <div class="content blog-content">
+      <h2 class="title is-3">Additional Analysis and Discussion</h2>
+      <p>
+        Our experiments with cognitive maps in language models for path planning tasks reveal several
+intriguing insights that extend beyond extrapolation. Here are some key findings & discussions:
+      </p>
+      <h3 class="title is-4">Rapid Adaptation During Training</h3>
+      <div class="columns">
+        <div class="column">
+          <img src="materials/rapid_adaptation.png" alt="Success rate and Loss curves">
+          <p class="caption">Success rate and loss curves showing rapid adaptation of cognitive map (Green plot)</p>
+          <p>
+            The models using cognitive maps demonstrate remarkably quick learning and adaptation to new scenarios. The success rate converges early (79.13% at step 500) and the loss curve shows faster convergence compared to baseline methods.
+          </p>
+        </div>
+      </div>
+
+      <h3 class="title is-4">Unpromptable Nature of Cognitive Maps</h3>
+      <div class="columns">
+        <div class="column">
+          <img src="materials/unpromptable_nature.png" alt="Prompting Results">
+          <p class="caption">Few-shot prompting results across different models and approaches</p>
+            <p>
+            Advanced language models often struggle to generate meaningful cognitive maps through simple prompting, underscoring the necessity for specialized training methods. Notably, only GPT-o1 demonstrates some success in creating cognitive maps without explicit prompting.
+            </p>
+            <p>
+            This success may be attributed to GPT-o1's training or fine-tuning, which likely enhances its reasoning process, encourages exploration of alternative strategies, and improves its ability to iteratively recognize and correct mistakes. Consequently, GPT-o1 may be more proficient at forming mental representations of spatial relationships, even without explicit prompts for cognitive maps.
+            </p>
+        </div>
+      </div>
+
+      <h3 class="title is-4">Comparison with Exploration-based Methods</h3>
+      <div class="columns">
+        <div class="column">
+          <img src="materials/exploration_comparison.png" alt="Exploration-based Planning Comparison">
+          <p class="caption">Performance comparison between cognitive maps and exploration-based planning</p>
+          <p>
+        While exploration-based methods achieve higher success rates in reachable planning scenarios (94.5% vs 88.5%), cognitive maps demonstrate superior efficiency in path optimality. This can be an analogy to two distinct human planning strategies:
+          </p>
+        </div>
+      </div>
+
+
+      <div class="columns">
+        <div class="column">
+          <div class="box has-background-light">
+        <h3 class="title is-4">Offline Planning</h3>
+        <p>Using cognitive maps to plan the entire route before taking the first step - like studying a map before starting a journey.</p>
+          </div>
+        </div>
+        <div class="column">
+          <div class="box has-background-light">
+        <h3 class="title is-4">Online Exploration</h3>
+        <p>Exploring and adjusting the route as you go - like using a GPS that recalculates when you take a wrong turn.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<section class="section">
+  <div class="container is-max-desktop">
+    <div class="content blog-content">
+
+      <h2 class="title is-3 mt-6">Looking Ahead</h2>
+      <p>
+        This research opens up exciting possibilities for the future of AI:
+      </p>
+      <ul>
+        <li>Creating AI systems that can tackle increasingly complex problems in generalized tasks</li>
+        <li>Developing models that combine careful planning (offline planning) with flexible adaptation (online planning)</li>
+      </ul>
+
+      <div class="box is-warning mt-6">
+        <h3 class="title is-4">Key Takeaway</h3>
+        <p>
+          By teaching AI to think more like humans - building mental maps and planning ahead - we can create systems that don't just solve the problems they're trained on, but can tackle new, more complex challenges they've never seen before.
+        </p>
+      </div>
+
+
+      <h2 class="title is-3">References</h2>
+      <div class="references">
+        <p class="reference">[1] Ida Momennejad, Hosein Hasanbeig, Felipe Vieira, Hiteshi Sharma, Robert Osazuwa Ness, Nebojsa
+          Jojic, Hamid Palangi, and Jonathan Larson. Evaluating cognitive maps and planning in large
+          language models with cogeval, 2023. </p>
+        <p class="reference">[2] Kahneman, D. Thinking, Fast and Slow, 2011.</p>
+        <p class="reference">[3] Jason Wei, Xuezhi Wang, Dale Schuurmans, Maarten Bosma, Brian Ichter, Fei Xia, Ed Chi, Quoc Le,
+          and Denny Zhou. Chain-of-thought prompting elicits reasoning in large language models, 2023.</p>
+        <p class="reference">[4] Guhao Feng, Bohang Zhang, Yuntian Gu, Haotian Ye, Di He, and Liwei Wang. Towards revealing
+          the mystery behind chain of thought: a theoretical perspective, 2024</p>
+
+        <p class="reference">[5] John O’Keefe and Lynn Nadel. The Hippocampus as a Cognitive Map. Oxford: Clarendon Press, 1978.</p>
+        <p class="reference">[6] William Merrill and Ashish Sabharwal. The parallelism tradeoff: Limitations of log-precision transformers, 2023. </p>
+
+      </div>
+
+
+    </div>
+  </div>
+</section>
+
+
+
+
+
+<footer class="footer">
+  <div class="container">
+    <div class="content has-text-centered">
+      <p>
+        Based on research by KAIST AI & Samsung Research<br>
+        <small>December 2024</small>
+      </p>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>
